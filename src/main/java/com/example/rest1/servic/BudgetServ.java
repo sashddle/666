@@ -8,7 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
-
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import com.example.rest1.repo.FinancialTransRepo;
+import com.example.rest1.model.FinancialTrans;
+import com.example.rest1.model.TransactionType;
+import com.example.rest1.model.TransactionStatus;
 @Service
 @Transactional
 public class BudgetServ {
@@ -81,4 +86,39 @@ public class BudgetServ {
         }
         categories.deleteById(id);
     }
+
+    public BudgetCategory changeLimit(Long id, BigDecimal newLimit) {
+
+        Check.nonnegative(newLimit);
+
+        BudgetCategory category = categories.findById(id)
+                .orElseThrow(() -> Check.missing("Category"));
+
+        BigDecimal spent = BigDecimal.ZERO;
+        LocalDateTime now = LocalDateTime.now();
+
+        for (FinancialTrans t : transactions.findAll()) {
+
+            if (t.type == TransactionType.EXPENSE
+                    && t.status == TransactionStatus.CONFIRMED
+                    && t.category != null
+                    && t.category.id.equals(id)
+                    && t.createdAt != null
+                    && t.createdAt.getYear() == now.getYear()
+                    && t.createdAt.getMonthValue() == now.getMonthValue()) {
+
+                spent = spent.add(t.amount);
+            }
+        }
+
+        Check.require(
+                newLimit.compareTo(spent) >= 0,
+                "New limit is less than current expenses"
+        );
+
+        category.monthlyExpenseLimit = newLimit;
+
+        return categories.save(category);
+    }
+
 }

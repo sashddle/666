@@ -5,6 +5,7 @@ import com.example.rest1.pip.SavingReq;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.*;
 import java.util.*;
+import java.math.BigDecimal;
 
 @RestController @RequestMapping("/api/savings-goals")
 public class SavingsCon {
@@ -39,4 +40,24 @@ public class SavingsCon {
     public Object saved(@PathVariable Long id) {
         return Map.of("goalId",id,"savedAmount",service.saved(id));
     }
+
+    @PostMapping("/{id}/add-money")
+    public ResponseEntity<?> addMoney(
+            @PathVariable Long id,
+            @RequestParam BigDecimal amount) {
+
+        return ResponseEntity.status(201)
+                .body(service.addMoney(id, amount));
+    }
+
+    @PostMapping("/{id}/complete")
+    public ResponseEntity<?> completeGoal(@PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                service.completeGoal(id)
+        );
+    }
+
 }
+
+

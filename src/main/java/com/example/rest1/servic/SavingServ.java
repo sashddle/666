@@ -60,7 +60,6 @@ public class SavingServ {
         goal.account = account;
         return goals.save(goal);
     }
-    // Суммируем только подтверждённые взносы на выбранную цель.
     public BigDecimal saved(Long id) {
         get(id);
         BigDecimal total = BigDecimal.ZERO;
@@ -85,4 +84,97 @@ public class SavingServ {
         }
         goals.deleteById(id);
     }
+
+    public FinancialTrans addMoney(Long goalId, BigDecimal amount) {
+
+        Check.positive(amount);
+
+        SavingsGoal goal = get(goalId);
+        MoneyAcc account = goal.account;
+
+        Check.require(
+                goal.status.equals("ACTIVE"),
+                "Goal is not active"
+        );
+
+        BigDecimal balance = account.initialBalance;
+        BigDecimal saved = BigDecimal.ZERO;
+
+        for (FinancialTrans t : transactions.findAll()) {
+
+            if (t.status != TransactionStatus.CONFIRMED) {
+                continue;
+            }
+
+            if (t.account.id.equals(account.id)) {
+                if (t.type == TransactionType.INCOME) {
+                    balance = balance.add(t.amount);
+                } else {
+                    balance = balance.subtract(t.amount);
+                }
+            }
+
+            if (t.type == TransactionType.CONTRIBUTION
+                    && t.goal != null
+                    && t.goal.id.equals(goalId)) {
+
+                saved = saved.add(t.amount);
+            }
+        }
+
+        Check.require(
+                balance.compareTo(amount) >= 0,
+                "Not enough money"
+        );
+
+        Check.require(
+                saved.add(amount).compareTo(goal.targetAmount) <= 0,
+                "Goal amount exceeded"
+        );
+
+        FinancialTrans operation = new FinancialTrans();
+
+        operation.amount = amount;
+        operation.type = TransactionType.CONTRIBUTION;
+        operation.status = TransactionStatus.CONFIRMED;
+        operation.createdAt = LocalDateTime.now();
+        operation.account = account;
+        operation.goal = goal;
+
+        return transactions.save(operation);
+    }
+
+    public SavingsGoal completeGoal(Long id) {
+
+        SavingsGoal goal = goals.findById(id)
+                .orElseThrow(() -> Check.missing("Goal"));
+
+        Check.require(
+                goal.status.equals("ACTIVE"),
+                "Goal is not active"
+        );
+
+        BigDecimal saved = BigDecimal.ZERO;
+
+        for (FinancialTrans t : transactions.findAll()) {
+
+            if (t.type == TransactionType.CONTRIBUTION
+                    && t.status == TransactionStatus.CONFIRMED
+                    && t.goal != null
+                    && t.goal.id.equals(id)) {
+
+                saved = saved.add(t.amount);
+            }
+        }
+
+        Check.require(
+                saved.compareTo(goal.targetAmount) >= 0,
+                "Not enough money saved"
+        );
+
+        goal.status = "COMPLETED";
+
+        return goals.save(goal);
+    }
+
 }

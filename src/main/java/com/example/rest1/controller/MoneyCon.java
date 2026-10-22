@@ -39,4 +39,6 @@ public class MoneyCon {
     public Object balance(@PathVariable Long id) {
         return Map.of("accountId",id,"balance",service.balance(id));
     }
+
 }
+

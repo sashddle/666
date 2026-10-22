@@ -5,7 +5,7 @@ import com.example.rest1.pip.BudgetRequest;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.*;
 import java.util.*;
-
+import java.math.BigDecimal;
 @RestController @RequestMapping("/api/budget-categories")
 public class BudgetCon {
     private final BudgetServ service;
@@ -40,4 +40,14 @@ public class BudgetCon {
         if(month<1||month>12)throw new org.springframework.web.server.ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid month");
         return Map.of("categoryId",id,"year",year,"month",month,"spent",service.spent(id,year,month));
     }
+    @PatchMapping("/{id}/change-limit")
+    public ResponseEntity<?> changeLimit(
+            @PathVariable Long id,
+            @RequestParam BigDecimal amount) {
+
+        return ResponseEntity.ok(
+                service.changeLimit(id, amount)
+        );
+    }
+
 }

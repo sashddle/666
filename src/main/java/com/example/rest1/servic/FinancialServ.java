@@ -45,8 +45,6 @@ public class FinancialServ {
         if (id == null || request.accountId()!=null) {
             operation.account = accounts.findById(request.accountId()==null ? -1 : request.accountId()).orElseThrow(() -> Check.missing("Account"));
         }
-        // A missing optional ID on PATCH keeps its existing value;
-        // Changing the type clears incompatible relations.
         if (id == null || request.type()!=null) {
             if (operation.type==TransactionType.INCOME) {
                 operation.category = null;
@@ -68,5 +66,89 @@ public class FinancialServ {
     public void delete(Long id) {
         get(id);
         transactions.deleteById(id);
+
     }
+    public FinancialTrans confirmTransaction(Long id) {
+
+        FinancialTrans operation = transactions.findById(id)
+                .orElseThrow(() -> Check.missing("Transaction"));
+
+        Check.require(
+                operation.status == TransactionStatus.PENDING,
+                "Transaction is not pending"
+        );
+
+        operation.status = TransactionStatus.CONFIRMED;
+
+        return transactions.save(operation);
+    }
+    public FinancialTrans payExpense(FinancialReq request) {
+
+        Check.positive(request.amount());
+
+        MoneyAcc account = accounts.findById(request.accountId())
+                .orElseThrow(() -> Check.missing("Account"));
+
+        BudgetCategory category = categories.findById(request.categoryId())
+                .orElseThrow(() -> Check.missing("Category"));
+
+        Check.require(
+                account.owner.id.equals(category.owner.id),
+                "Different owners"
+        );
+
+        BigDecimal balance = account.initialBalance;
+        BigDecimal spent = BigDecimal.ZERO;
+
+        LocalDateTime now = LocalDateTime.now();
+
+        for (FinancialTrans t : transactions.findAll()) {
+
+            if (t.status != TransactionStatus.CONFIRMED) {
+                continue;
+            }
+
+            if (t.account.id.equals(account.id)) {
+
+                if (t.type == TransactionType.INCOME) {
+                    balance = balance.add(t.amount);
+                } else {
+                    balance = balance.subtract(t.amount);
+                }
+            }
+
+            if (t.type == TransactionType.EXPENSE
+                    && t.category != null
+                    && t.category.id.equals(category.id)
+                    && t.createdAt.getYear() == now.getYear()
+                    && t.createdAt.getMonthValue() == now.getMonthValue()) {
+
+                spent = spent.add(t.amount);
+            }
+        }
+
+        Check.require(
+                balance.compareTo(request.amount()) >= 0,
+                "Not enough money"
+        );
+
+        BigDecimal total = spent.add(request.amount());
+
+        Check.require(
+                total.compareTo(category.monthlyExpenseLimit) <= 0,
+                "Monthly limit exceeded"
+        );
+
+        FinancialTrans operation = new FinancialTrans();
+
+        operation.amount = request.amount();
+        operation.type = TransactionType.EXPENSE;
+        operation.status = TransactionStatus.CONFIRMED;
+        operation.createdAt = now;
+        operation.account = account;
+        operation.category = category;
+
+        return transactions.save(operation);
+    }
+
 }

@@ -3,7 +3,7 @@ package com.example.rest1.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
-@Entity @Table(name = "app_users")
+@Entity @Table(name = "users")
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;

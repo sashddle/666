@@ -34,4 +34,19 @@ public class FinancialTransCon {
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
+
+    @PostMapping("/pay-expense")
+    public ResponseEntity<?> payExpense(@RequestBody FinancialReq request) {
+
+        return ResponseEntity.status(201)
+                .body(service.payExpense(request));
+    }
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity<?> confirmTransaction(@PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                service.confirmTransaction(id)
+        );
+    }
+
 }

@@ -1,34 +1,48 @@
+
 package com.example.rest1.controller;
 
 import com.example.rest1.servic.FinancialServ;
 import com.example.rest1.pip.FinancialReq;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
-@RestController @RequestMapping("/api/financial-transactions")
+@RestController
+@RequestMapping("/api/financial-transactions")
+@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 public class FinancialTransCon {
+
     private final FinancialServ service;
+
     public FinancialTransCon(FinancialServ service) {
         this.service = service;
     }
+
     @GetMapping
-    public Object all()
-    {
+    public Object all() {
         return service.all();
     }
+
     @GetMapping("/{id}")
     public Object one(@PathVariable Long id) {
         return service.get(id);
     }
+
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody FinancialReq r)
-    {
-        return ResponseEntity.status(201).body(service.save(null,r));
+    public ResponseEntity<?> create(@RequestBody FinancialReq r) {
+
+        return ResponseEntity.status(201)
+                .body(service.save(null, r));
     }
+
     @PatchMapping("/{id}")
-    public Object update(@PathVariable Long id,@RequestBody FinancialReq r) {
-        return service.save(id,r);
+    public Object update(
+            @PathVariable Long id,
+            @RequestBody FinancialReq r
+    ) {
+        return service.save(id, r);
     }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
@@ -36,17 +50,19 @@ public class FinancialTransCon {
     }
 
     @PostMapping("/pay-expense")
-    public ResponseEntity<?> payExpense(@RequestBody FinancialReq request) {
-
+    public ResponseEntity<?> payExpense(
+            @RequestBody FinancialReq request
+    ) {
         return ResponseEntity.status(201)
                 .body(service.payExpense(request));
     }
-    @PostMapping("/{id}/confirm")
-    public ResponseEntity<?> confirmTransaction(@PathVariable Long id) {
 
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity<?> confirmTransaction(
+            @PathVariable Long id
+    ) {
         return ResponseEntity.ok(
                 service.confirmTransaction(id)
         );
     }
-
 }

@@ -3,12 +3,15 @@ package com.example.rest1.servic;
 
 import com.example.rest1.model.Role;
 import com.example.rest1.model.User;
+import com.example.rest1.pip.LoginReq;
 import com.example.rest1.pip.RegisterReq;
+import com.example.rest1.pip.TokenResponse;
 import com.example.rest1.repo.UserRepo;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.charset.StandardCharsets;
@@ -19,16 +22,20 @@ public class AuthServ {
 
     private final UserRepo users;
     private final PasswordEncoder passwordEncoder;
+    private final TokenServ tokens;
 
     public AuthServ(
             UserRepo users,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            TokenServ tokens
     ) {
         this.users = users;
         this.passwordEncoder = passwordEncoder;
+        this.tokens = tokens;
     }
 
-    public User register(RegisterReq request) {
+    @Transactional
+    public TokenResponse register(RegisterReq request) {
 
         if (request.name() == null || request.name().isBlank()) {
             throw new ResponseStatusException(
@@ -71,7 +78,6 @@ public class AuthServ {
         }
 
         if (users.existsByEmailIgnoreCase(email)) {
-
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Email already exists"
@@ -87,12 +93,55 @@ public class AuthServ {
         user.enabled = true;
 
         try {
-            return users.saveAndFlush(user);
+            user = users.saveAndFlush(user);
         } catch (DataIntegrityViolationException e) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Cannot register user"
             );
         }
+
+        return tokens.issue(user, request.deviceId());
+    }
+
+    @Transactional
+    public TokenResponse login(LoginReq request) {
+
+        if (request.email() == null
+                || request.email().isBlank()
+                || request.password() == null
+                || request.password().isBlank()) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        User user = users.findByEmailIgnoreCase(
+                request.email().trim()
+        ).orElse(null);
+
+        if (user == null
+                || !user.enabled
+                || user.passwordHash == null) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        if (request.password()
+                .getBytes(StandardCharsets.UTF_8).length > 72
+                || !passwordEncoder.matches(
+                request.password(),
+                user.passwordHash
+        )) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        return tokens.issue(user, request.deviceId());
     }
 }

@@ -1,0 +1,2339 @@
+{
+  "info": {
+    "name": "RBPO Lab 5 — Personal Budget — Variant 28",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "JWT HS256, rotation, replay, roles, CRUD and business operations. Run in order on local test database. Requires existing Test (id 5), Admin, and foreign owner id 3. Financial test objects are created; refresh sessions are retained. Set passwords locally. For SQL audit use deviceId from the first login."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "userEmail",
+      "value": "test@example.com",
+      "type": "string"
+    },
+    {
+      "key": "userPassword",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@example.com",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ownerId",
+      "value": "5",
+      "type": "string"
+    },
+    {
+      "key": "accountId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "goalId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transactionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tempTransactionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "foreignAccountId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "foreignCategoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "foreignGoalId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "foreignTransactionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tempAccountId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tempCategoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tempGoalId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "oldAccess",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "oldRefresh",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminAccess",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminRefresh",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "deviceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newPassword",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "registeredAccess",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "registeredRefresh",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. JWT — вход, refresh, регистрация и роли",
+      "item": [
+        {
+          "name": "USER: вход и выдача пары",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\",\n  \"deviceId\": \"{{deviceId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset(\"accountId\");",
+                  "pm.collectionVariables.unset(\"categoryId\");",
+                  "pm.collectionVariables.unset(\"goalId\");",
+                  "pm.collectionVariables.unset(\"transactionId\");",
+                  "pm.collectionVariables.unset(\"tempTransactionId\");",
+                  "pm.collectionVariables.unset(\"foreignAccountId\");",
+                  "pm.collectionVariables.unset(\"foreignCategoryId\");",
+                  "pm.collectionVariables.unset(\"foreignGoalId\");",
+                  "pm.collectionVariables.unset(\"foreignTransactionId\");",
+                  "pm.collectionVariables.unset(\"tempAccountId\");",
+                  "pm.collectionVariables.unset(\"tempCategoryId\");",
+                  "pm.collectionVariables.unset(\"tempGoalId\");",
+                  "pm.collectionVariables.unset(\"accessToken\");",
+                  "pm.collectionVariables.unset(\"refreshToken\");",
+                  "pm.collectionVariables.unset(\"oldAccess\");",
+                  "pm.collectionVariables.unset(\"oldRefresh\");",
+                  "pm.collectionVariables.unset(\"adminAccess\");",
+                  "pm.collectionVariables.unset(\"adminRefresh\");",
+                  "pm.collectionVariables.unset(\"deviceId\");",
+                  "pm.collectionVariables.unset(\"newEmail\");",
+                  "pm.collectionVariables.set(\"deviceId\", \"lab5-\" + Date.now());",
+                  "pm.collectionVariables.set(\"newEmail\", \"lab5-\" + Date.now() + \"@example.com\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const x=pm.response.json(); pm.test(\"Token pair\", function () { pm.expect(x.accessToken).to.be.a(\"string\").and.not.empty; pm.expect(x.refreshToken).to.be.a(\"string\").and.not.empty; pm.expect(x.accessToken.split(\".\").length).to.eql(3); pm.expect(x.refreshToken.split(\".\").length).to.eql(3); }); pm.collectionVariables.set(\"accessToken\",x.accessToken); pm.collectionVariables.set(\"refreshToken\",x.refreshToken); } else { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Доступ с access",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/money-accounts"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Без токена",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/money-accounts",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"No new token pair\", function () { let x = {}; try { x = pm.response.json() || {}; } catch(e) {} pm.expect(x.accessToken).to.be.undefined; pm.expect(x.refreshToken).to.be.undefined; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh вместо access",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/money-accounts",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{refreshToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"No new token pair\", function () { let x = {}; try { x = pm.response.json() || {}; } catch(e) {} pm.expect(x.accessToken).to.be.undefined; pm.expect(x.refreshToken).to.be.undefined; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Access вместо refresh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/refresh",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{accessToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"No new token pair\", function () { let x = {}; try { x = pm.response.json() || {}; } catch(e) {} pm.expect(x.accessToken).to.be.undefined; pm.expect(x.refreshToken).to.be.undefined; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Обновление пары",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/refresh",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{oldRefresh}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"oldAccess\",pm.collectionVariables.get(\"accessToken\"));",
+                  "pm.collectionVariables.set(\"oldRefresh\",pm.collectionVariables.get(\"refreshToken\"));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const x=pm.response.json(); pm.test(\"Token pair\", function () { pm.expect(x.accessToken).to.be.a(\"string\").and.not.empty; pm.expect(x.refreshToken).to.be.a(\"string\").and.not.empty; pm.expect(x.accessToken.split(\".\").length).to.eql(3); pm.expect(x.refreshToken.split(\".\").length).to.eql(3); }); pm.collectionVariables.set(\"accessToken\",x.accessToken); pm.collectionVariables.set(\"refreshToken\",x.refreshToken); } else { pm.execution.setNextRequest(null); }",
+                  "if (pm.response.code===200) { const x=pm.response.json(); pm.test(\"Both tokens changed\", function(){pm.expect(x.accessToken).not.eql(pm.collectionVariables.get(\"oldAccess\")); pm.expect(x.refreshToken).not.eql(pm.collectionVariables.get(\"oldRefresh\"));}); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Повтор старого refresh: USED → REVOKED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/refresh",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{oldRefresh}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"No new token pair\", function () { let x = {}; try { x = pm.response.json() || {}; } catch(e) {} pm.expect(x.accessToken).to.be.undefined; pm.expect(x.refreshToken).to.be.undefined; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Повтор REVOKED refresh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/refresh",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{oldRefresh}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"No new token pair\", function () { let x = {}; try { x = pm.response.json() || {}; } catch(e) {} pm.expect(x.accessToken).to.be.undefined; pm.expect(x.refreshToken).to.be.undefined; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Новый access работает",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/money-accounts"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Неверный refresh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/refresh",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"invalid.token.value\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"No new token pair\", function () { let x = {}; try { x = pm.response.json() || {}; } catch(e) {} pm.expect(x.accessToken).to.be.undefined; pm.expect(x.refreshToken).to.be.undefined; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Пустой refresh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/refresh",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"No new token pair\", function () { let x = {}; try { x = pm.response.json() || {}; } catch(e) {} pm.expect(x.accessToken).to.be.undefined; pm.expect(x.refreshToken).to.be.undefined; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Неверный пароль",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"wrong-password\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"No new token pair\", function () { let x = {}; try { x = pm.response.json() || {}; } catch(e) {} pm.expect(x.accessToken).to.be.undefined; pm.expect(x.refreshToken).to.be.undefined; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Пустой пароль",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"No new token pair\", function () { let x = {}; try { x = pm.response.json() || {}; } catch(e) {} pm.expect(x.accessToken).to.be.undefined; pm.expect(x.refreshToken).to.be.undefined; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Слабый пароль регистрации",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/register",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Weak\",\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"No new token pair\", function () { let x = {}; try { x = pm.response.json() || {}; } catch(e) {} pm.expect(x.accessToken).to.be.undefined; pm.expect(x.refreshToken).to.be.undefined; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Регистрация и выдача пары",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/register",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Lab5 test\",\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"{{newPassword}}\",\n  \"deviceId\": \"{{deviceId}}-register\",\n  \"role\": \"ADMIN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { const x=pm.response.json(); pm.test(\"Token pair\", function () { pm.expect(x.accessToken).to.be.a(\"string\").and.not.empty; pm.expect(x.refreshToken).to.be.a(\"string\").and.not.empty; pm.expect(x.accessToken.split(\".\").length).to.eql(3); pm.expect(x.refreshToken.split(\".\").length).to.eql(3); }); pm.collectionVariables.set(\"registeredAccess\",x.accessToken); pm.collectionVariables.set(\"registeredRefresh\",x.refreshToken); } else { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Регистрация не даёт ADMIN",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{registeredAccess}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Повторная регистрация",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/register",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Lab5 test\",\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"{{newPassword}}\",\n  \"deviceId\": \"{{deviceId}}-register\",\n  \"role\": \"ADMIN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"No new token pair\", function () { let x = {}; try { x = pm.response.json() || {}; } catch(e) {} pm.expect(x.accessToken).to.be.undefined; pm.expect(x.refreshToken).to.be.undefined; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER не видит список пользователей",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN: вход",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\",\n  \"deviceId\": \"{{deviceId}}-admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const x=pm.response.json(); pm.test(\"Token pair\", function () { pm.expect(x.accessToken).to.be.a(\"string\").and.not.empty; pm.expect(x.refreshToken).to.be.a(\"string\").and.not.empty; pm.expect(x.accessToken.split(\".\").length).to.eql(3); pm.expect(x.refreshToken.split(\".\").length).to.eql(3); }); pm.collectionVariables.set(\"adminAccess\",x.accessToken); pm.collectionVariables.set(\"adminRefresh\",x.refreshToken); } else { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN: список пользователей",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccess}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02. Создание данных и CRUD",
+      "item": [
+        {
+          "name": "Создать счет",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/money-accounts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman account\",\n  \"initialBalance\": 50000,\n  \"ownerId\": {{ownerId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"accountId\", pm.response.json().id); }",
+                  "if (pm.response.code !== 201) { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Свои счета",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/money-accounts"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Счет по ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/money-accounts/{{accountId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Изменить название счета",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/money-accounts/{{accountId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main account\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создать категорию",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/budget-categories",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Food\",\n  \"monthlyExpenseLimit\": 15000,\n  \"ownerId\": {{ownerId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"categoryId\", pm.response.json().id); }",
+                  "if (pm.response.code !== 201) { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Свои категории",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/budget-categories"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Категория по ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/budget-categories/{{categoryId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Изменить название категории",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/budget-categories/{{categoryId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Food updated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создать цель",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/savings-goals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laptop\",\n  \"targetAmount\": 10000,\n  \"ownerId\": {{ownerId}},\n  \"accountId\": {{accountId}},\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"goalId\", pm.response.json().id); }",
+                  "if (pm.response.code !== 201) { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Свои цели",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/savings-goals"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Цель по ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/savings-goals/{{goalId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Изменить название цели",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/savings-goals/{{goalId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laptop updated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создать временную транзакцию",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/financial-transactions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": {{accountId}},\n  \"amount\": 100,\n  \"type\": \"INCOME\",\n  \"status\": \"PENDING\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"tempTransactionId\", pm.response.json().id); }",
+                  "if (pm.response.code !== 201) { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Изменить временную транзакцию",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/financial-transactions/{{tempTransactionId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 200\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удалить временную транзакцию",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/financial-transactions/{{tempTransactionId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03. Пять бизнес-операций",
+      "item": [
+        {
+          "name": "1. Оплата расхода",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/financial-transactions/pay-expense",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": {{accountId}},\n  \"categoryId\": {{categoryId}},\n  \"amount\": 500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.test(\"CONFIRMED\", () => pm.expect(pm.response.json().status).to.eql(\"CONFIRMED\")); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Пополнить накопления",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/savings-goals/{{goalId}}/add-money?amount=10000"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создать PENDING доход",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/financial-transactions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": {{accountId}},\n  \"amount\": 2000,\n  \"type\": \"INCOME\",\n  \"status\": \"PENDING\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"transactionId\", pm.response.json().id); }",
+                  "if (pm.response.code !== 201) { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Подтвердить транзакцию",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/financial-transactions/{{transactionId}}/confirm"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { pm.test(\"CONFIRMED\", () => pm.expect(pm.response.json().status).to.eql(\"CONFIRMED\")); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. Изменить лимит",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/budget-categories/{{categoryId}}/change-limit?amount=20000"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. Завершить цель",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/savings-goals/{{goalId}}/complete"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { pm.test(\"COMPLETED\", () => pm.expect(pm.response.json().status).to.eql(\"COMPLETED\")); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Баланс 41500",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/money-accounts/{{accountId}}/balance"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { pm.test(\"Balance 41500\", () => pm.expect(pm.response.json().balance).to.eql(41500)); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Накоплено 10000",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/savings-goals/{{goalId}}/saved"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { pm.test(\"Saved 10000\", () => pm.expect(pm.response.json().savedAmount).to.eql(10000)); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Свои транзакции",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/financial-transactions"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Транзакция по ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/financial-transactions/{{transactionId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Повторное подтверждение",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/financial-transactions/{{transactionId}}/confirm"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Превышение лимита",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/financial-transactions/pay-expense",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": {{accountId}},\n  \"categoryId\": {{categoryId}},\n  \"amount\": 25000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Пополнение завершенной цели",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/savings-goals/{{goalId}}/add-money?amount=1"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04. Проверка чужих данных",
+      "item": [
+        {
+          "name": "ADMIN: создать чужой счет",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/money-accounts",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccess}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Foreign test account\",\n  \"initialBalance\": 50000,\n  \"ownerId\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"foreignAccountId\", pm.response.json().id); }",
+                  "if (pm.response.code !== 201) { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN: создать чужую категорию",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/budget-categories",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccess}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Foreign test category\",\n  \"monthlyExpenseLimit\": 15000,\n  \"ownerId\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"foreignCategoryId\", pm.response.json().id); }",
+                  "if (pm.response.code !== 201) { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN: создать чужую цель",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/savings-goals",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccess}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Foreign test goal\",\n  \"targetAmount\": 10000,\n  \"ownerId\": 3,\n  \"accountId\": {{foreignAccountId}},\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"foreignGoalId\", pm.response.json().id); }",
+                  "if (pm.response.code !== 201) { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN: создать чужую транзакцию",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/financial-transactions",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccess}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": {{foreignAccountId}},\n  \"amount\": 200,\n  \"type\": \"INCOME\",\n  \"status\": \"PENDING\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"foreignTransactionId\", pm.response.json().id); }",
+                  "if (pm.response.code !== 201) { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER: чужой счет",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/money-accounts/{{foreignAccountId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER: чужая категория",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/budget-categories/{{foreignCategoryId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER: чужая цель",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/savings-goals/{{foreignGoalId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER: чужая транзакция",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/financial-transactions/{{foreignTransactionId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER: оплата чужого расхода",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/financial-transactions/pay-expense",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": {{foreignAccountId}},\n  \"categoryId\": {{foreignCategoryId}},\n  \"amount\": 500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER: пополнение чужой цели",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/savings-goals/{{foreignGoalId}}/add-money?amount=500"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER: подтверждение чужой транзакции",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/financial-transactions/{{foreignTransactionId}}/confirm"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER: изменение чужого лимита",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/budget-categories/{{foreignCategoryId}}/change-limit?amount=30000"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER: завершение чужой цели",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/savings-goals/{{foreignGoalId}}/complete"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER: создать счет чужого владельца",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/money-accounts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Forbidden\",\n  \"initialBalance\": 0,\n  \"ownerId\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "USER: удаление чужого счета",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/money-accounts/{{foreignAccountId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN: чужой счет доступен",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/money-accounts/{{foreignAccountId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccess}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05. Удаление тестовых данных",
+      "item": [
+        {
+          "name": "ADMIN: удалить чужую тестовую транзакцию",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/financial-transactions/{{foreignTransactionId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccess}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN: удалить чужую тестовую цель",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/savings-goals/{{foreignGoalId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccess}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN: удалить чужую тестовую категорию",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/budget-categories/{{foreignCategoryId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccess}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN: удалить чужой тестовый счет",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/money-accounts/{{foreignAccountId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccess}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создать временный счет",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/money-accounts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Temporary\",\n  \"initialBalance\": 0,\n  \"ownerId\": {{ownerId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"tempAccountId\", pm.response.json().id); }",
+                  "if (pm.response.code !== 201) { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создать временную категорию",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/budget-categories",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Temporary\",\n  \"monthlyExpenseLimit\": 0,\n  \"ownerId\": {{ownerId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"tempCategoryId\", pm.response.json().id); }",
+                  "if (pm.response.code !== 201) { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создать временную цель",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/savings-goals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Temporary\",\n  \"targetAmount\": 1,\n  \"ownerId\": {{ownerId}},\n  \"accountId\": {{tempAccountId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"tempGoalId\", pm.response.json().id); }",
+                  "if (pm.response.code !== 201) { pm.execution.setNextRequest(null); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удалить временную цель",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/savings-goals/{{tempGoalId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удалить временную категорию",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/budget-categories/{{tempCategoryId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Удалить временный счет",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/money-accounts/{{tempAccountId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
